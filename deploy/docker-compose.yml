@@ -1,0 +1,57 @@
+# 🚀 Production Deployment (Docker Compose)
+# Full stack: API + Redis + Postgres
+
+version: "3.9"
+
+services:
+
+  # -----------------------------
+  # 🌐 AI Runtime API Service
+  # -----------------------------
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: drama-flow-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=prod
+      - LOG_LEVEL=INFO
+      - WEB_SEARCH_PROVIDER=serpapi
+    depends_on:
+      - redis
+      - postgres
+    restart: always
+
+  # -----------------------------
+  # 🧠 Redis (Cache + Queue)
+  # -----------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: drama-flow-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  # -----------------------------
+  # 🗄 Postgres (Tenant + Logs + Memory)
+  # -----------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: drama-flow-postgres
+    environment:
+      POSTGRES_USER: drama
+      POSTGRES_PASSWORD: drama_password
+      POSTGRES_DB: drama_flow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+# -----------------------------
+# 💾 Persistent Volumes
+# -----------------------------
+volumes:
+  pgdata:
