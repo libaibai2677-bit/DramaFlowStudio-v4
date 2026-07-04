@@ -1,0 +1,35 @@
+{
+  "name": "dramaflow-ai-desktop",
+  "version": "1.0.0",
+  "description": "DramaFlow AI Desktop App (Electron wrapper for AI Agent platform)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir",
+    "release": "electron-builder --publish=never"
+  },
+  "build": {
+    "appId": "com.dramaflow.ai",
+    "productName": "DramaFlow AI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
