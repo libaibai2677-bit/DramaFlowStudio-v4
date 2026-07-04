@@ -1,45 +1,58 @@
-# 🚀 Production Deployment (Docker Compose)
-# Full stack: API + Redis + Postgres
+# 🌍 DramaFlow AI - Cloud Deployment (Production Compose)
+# Upgraded: full product stack (API + UI + Redis + Postgres + Worker)
 
 version: "3.9"
 
 services:
 
   # -----------------------------
-  # 🌐 AI Runtime API Service
+  # 🌐 API Service
   # -----------------------------
   api:
     build:
       context: ..
       dockerfile: Dockerfile
-    container_name: drama-flow-api
+    container_name: dramaflow_api
+    restart: always
     ports:
       - "8000:8000"
     environment:
-      - ENV=prod
-      - LOG_LEVEL=INFO
-      - WEB_SEARCH_PROVIDER=serpapi
+      - ENV=production
+      - PYTHONUNBUFFERED=1
+    command: uvicorn src.app_entry:app --host 0.0.0.0 --port 8000
     depends_on:
       - redis
       - postgres
-    restart: always
 
   # -----------------------------
-  # 🧠 Redis (Cache + Queue)
+  # 🖥 UI Service
+  # -----------------------------
+  ui:
+    image: nginx:alpine
+    container_name: dramaflow_ui
+    restart: always
+    ports:
+      - "3000:80"
+    volumes:
+      - ../src/static:/usr/share/nginx/html:ro
+
+  # -----------------------------
+  # 🧠 Redis (cache / queue)
   # -----------------------------
   redis:
     image: redis:7-alpine
-    container_name: drama-flow-redis
+    container_name: dramaflow_redis
+    restart: always
     ports:
       - "6379:6379"
-    restart: always
 
   # -----------------------------
-  # 🗄 Postgres (Tenant + Logs + Memory)
+  # 🗄 Postgres (memory / logs / tenant)
   # -----------------------------
   postgres:
     image: postgres:15-alpine
-    container_name: drama-flow-postgres
+    container_name: dramaflow_postgres
+    restart: always
     environment:
       POSTGRES_USER: drama
       POSTGRES_PASSWORD: drama_password
@@ -48,10 +61,20 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # -----------------------------
+  # ⚙ Worker (async extension point)
+  # -----------------------------
+  worker:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: dramaflow_worker
     restart: always
+    command: python -c "print('worker ready - attach queue system here')"
 
 # -----------------------------
-# 💾 Persistent Volumes
+# 💾 Volumes
 # -----------------------------
 volumes:
   pgdata:
