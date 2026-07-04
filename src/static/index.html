@@ -1,0 +1,125 @@
+<!-- 🖥️ AI Agent Dashboard (MVP UI Layer) -->
+<!-- This turns the AI Runtime into a visible product interface -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DramaFlow AI Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        header {
+            padding: 16px;
+            background: #111827;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .left {
+            width: 30%;
+            padding: 16px;
+            border-right: 1px solid #334155;
+        }
+
+        .right {
+            flex: 1;
+            padding: 16px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: white;
+            border-radius: 6px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            background: #0b1220;
+            padding: 12px;
+            border-radius: 6px;
+            height: 100%;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    🚀 DramaFlow AI Agent Dashboard
+</header>
+
+<div class="container">
+
+    <div class="left">
+        <h3>Run AI Task</h3>
+
+        <label>Goal</label>
+        <textarea id="goal" rows="6" placeholder="Describe your task..."></textarea>
+
+        <label>Mode</label>
+        <input id="mode" value="auto" />
+
+        <button onclick="runAI()">Execute</button>
+    </div>
+
+    <div class="right">
+        <h3>Output</h3>
+        <pre id="output">Waiting for execution...</pre>
+    </div>
+
+</div>
+
+<script>
+async function runAI() {
+    const goal = document.getElementById('goal').value;
+    const mode = document.getElementById('mode').value;
+
+    document.getElementById('output').innerText = 'Running...';
+
+    const res = await fetch('/run', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ goal, mode })
+    });
+
+    const data = await res.json();
+
+    document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>
