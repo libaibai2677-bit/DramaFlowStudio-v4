@@ -1,0 +1,270 @@
+<!-- 🌟 DramaFlow AI - Pro UX Polished Dashboard (ChatGPT-Level UI) -->
+<!-- Focus: visual hierarchy, micro-interactions, streaming-friendly UX, modern SaaS feel -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DramaFlow AI - Pro Workspace</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+    --bg:#0a0f1c;
+    --panel:#0f172a;
+    --panel2:#111c33;
+    --border:#22314a;
+    --text:#e5e7eb;
+    --muted:#94a3b8;
+    --accent:#4f8cff;
+    --good:#22c55e;
+}
+
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto;
+    background:var(--bg);
+    color:var(--text);
+    height:100vh;
+    display:flex;
+}
+
+/* Sidebar */
+.sidebar{
+    width:280px;
+    background:var(--panel);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+}
+
+.logo{
+    padding:16px;
+    font-weight:700;
+    letter-spacing:0.3px;
+    border-bottom:1px solid var(--border);
+}
+
+.session{
+    padding:10px;
+    margin:8px;
+    border-radius:10px;
+    background:var(--panel2);
+    cursor:pointer;
+    transition:0.2s;
+    font-size:13px;
+    color:var(--muted);
+}
+
+.session:hover{
+    background:#172554;
+    color:var(--text);
+    transform:translateX(2px);
+}
+
+/* Main */
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.topbar{
+    padding:12px 18px;
+    border-bottom:1px solid var(--border);
+    background:rgba(15,23,42,0.85);
+    backdrop-filter:blur(10px);
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.badge{
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    color:var(--muted);
+}
+
+.workspace{
+    flex:1;
+    display:flex;
+}
+
+.editor{
+    width:38%;
+    padding:18px;
+    border-right:1px solid var(--border);
+}
+
+.output{
+    flex:1;
+    padding:18px;
+    background:linear-gradient(180deg,var(--panel2),var(--bg));
+    overflow:auto;
+}
+
+textarea,input{
+    width:100%;
+    background:#0b1220;
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+    outline:none;
+    transition:0.2s;
+}
+
+textarea:focus,input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(79,140,255,0.15);
+}
+
+button{
+    margin-top:12px;
+    width:100%;
+    padding:12px;
+    background:linear-gradient(135deg,#4f8cff,#2563eb);
+    border:none;
+    color:white;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.2s;
+}
+
+button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 10px 25px rgba(79,140,255,0.25);
+}
+
+/* Chat-style output */
+.message{
+    padding:12px 14px;
+    margin-bottom:10px;
+    border-radius:12px;
+    max-width:90%;
+    animation:fadeIn 0.2s ease;
+}
+
+.user{
+    background:#1d2b53;
+    margin-left:auto;
+}
+
+.ai{
+    background:#0f1c33;
+    border:1px solid var(--border);
+}
+
+.thinking{
+    color:var(--muted);
+    font-style:italic;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(6px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes pulse{
+    0%{opacity:0.4}
+    50%{opacity:1}
+    100%{opacity:0.4}
+}
+
+/* Streaming cursor */
+.cursor{
+    display:inline-block;
+    width:8px;
+    background:var(--accent);
+    animation:blink 1s infinite;
+}
+
+@keyframes blink{
+    50%{opacity:0}
+}
+
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">🧠 DramaFlow Pro</div>
+    <div id="sessions"></div>
+</div>
+
+<div class="main">
+
+    <div class="topbar">
+        <span class="badge">Realtime AI</span>
+        <span class="badge">Streaming UX</span>
+        <span class="badge">Agent OS</span>
+    </div>
+
+    <div class="workspace">
+
+        <div class="editor">
+            <h3>⚡ Task</h3>
+            <textarea id="goal" rows="8" placeholder="Ask your AI agent..."></textarea>
+            <input id="mode" value="auto" />
+            <button onclick="run()">Run Agent</button>
+        </div>
+
+        <div class="output" id="output"></div>
+
+    </div>
+</div>
+
+<script>
+const output = document.getElementById('output');
+
+function addMessage(text, type){
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    div.innerText = text;
+    output.appendChild(div);
+    output.scrollTop = output.scrollHeight;
+}
+
+async function run(){
+    const goal = document.getElementById('goal').value;
+    const mode = document.getElementById('mode').value;
+
+    addMessage(goal,'user');
+    addMessage('Thinking...','thinking');
+
+    const res = await fetch('/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal,mode})});
+    const data = await res.json();
+
+    document.querySelectorAll('.thinking').forEach(e=>e.remove());
+
+    // simulate streaming feel
+    let text = JSON.stringify(data.result,null,2);
+    let i = 0;
+
+    const ai = document.createElement('div');
+    ai.className = 'message ai';
+    output.appendChild(ai);
+
+    function stream(){
+        if(i<text.length){
+            ai.innerText = text.slice(0,i) + '▌';
+            i++;
+            requestAnimationFrame(stream);
+        }else{
+            ai.innerText = text;
+        }
+    }
+
+    stream();
+}
+</script>
+
+</body>
+</html>
