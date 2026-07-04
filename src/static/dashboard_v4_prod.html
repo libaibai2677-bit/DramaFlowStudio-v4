@@ -1,0 +1,71 @@
+<!-- DramaFlow AI Production UI -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DramaFlow AI</title>
+<style>
+body{margin:0;font-family:system-ui;background:#070b14;color:#e6edf3;display:flex;height:100vh}
+.sidebar{width:280px;background:#0e1628;border-right:1px solid #1f2a44}
+.main{flex:1;display:flex;flex-direction:column}
+.top{padding:10px;border-bottom:1px solid #1f2a44;background:#0b1220}
+.workspace{flex:1;display:flex}
+.left{width:40%;padding:16px;border-right:1px solid #1f2a44}
+.right{flex:1;padding:16px;overflow:auto}
+textarea,input{width:100%;margin-top:10px;padding:10px;background:#0a1222;color:#fff;border:1px solid #1f2a44;border-radius:8px}
+button{margin-top:10px;width:100%;padding:10px;background:#5b8cff;border:none;color:#fff;border-radius:8px}
+.msg{padding:10px;margin:8px 0;border-radius:8px;white-space:pre-wrap}
+.user{background:#1a2b55;margin-left:auto}
+.ai{background:#0f172a;border:1px solid #1f2a44}
+</style>
+</head>
+<body>
+
+<div class="sidebar"></div>
+
+<div class="main">
+<div class="top">DramaFlow AI Production UI</div>
+<div class="workspace">
+
+<div class="left">
+<h3>Task</h3>
+<textarea id="goal"></textarea>
+<input id="mode" value="auto"/>
+<button onclick="run()">Run</button>
+</div>
+
+<div class="right" id="out"></div>
+
+</div>
+</div>
+
+<script>
+async function run(){
+const goal=document.getElementById('goal').value;
+const mode=document.getElementById('mode').value;
+
+const out=document.getElementById('out');
+
+out.innerHTML+='<div class="msg user">'+goal+'</div>';
+
+const res=await fetch('/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal,mode})});
+const data=await res.json();
+
+let ai=document.createElement('div');
+ai.className='msg ai';
+out.appendChild(ai);
+
+let text=JSON.stringify(data.result,null,2);
+let i=0;
+
+function tick(){
+if(i<text.length){ai.innerText=text.slice(0,i)+'▌';i++;requestAnimationFrame(tick)}
+else ai.innerText=text;
+}
+
+tick();
+}
+</script>
+
+</body>
+</html>
